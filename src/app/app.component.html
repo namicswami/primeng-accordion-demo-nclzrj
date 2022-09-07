@@ -1,0 +1,148 @@
+<p-breadcrumb [model]="items" [home]="home"></p-breadcrumb>
+<i
+class="pi pi-bell p-mr-4 p-text-secondary"
+pBadge
+style="font-size: 2rem"
+value="2"
+></i>
+<i
+class="pi pi-calendar p-mr-4 p-text-secondary"
+pBadge
+style="font-size: 2rem"
+[value]="'10+'"
+severity="danger"
+></i>
+<i
+class="pi pi-envelope p-text-secondary"
+pBadge
+style="font-size: 2rem"
+severity="danger"
+></i>
+
+
+<p-accordion>
+    <p-accordionTab header="Account Name: ABC Company" [selected]="true">
+        <p>Deal Name: 5670_ABC_Wilbert_08/22/2022</p> <p-button type="button" (click)="visibleSidebar1 = true" icon="pi pi-arrow-right"></p-button>
+    </p-accordionTab>
+</p-accordion>
+
+<p-sidebar [(visible)]="visibleSidebar1" [baseZIndex]="10000">
+<h1 style="font-weight:normal">SES Web</h1>
+<p-button type="button" (click)="visibleSidebar1 = false" label="Save" styleClass="p-button-success"></p-button>
+<p-button type="button" (click)="visibleSidebar1 = false" label="Cancel" styleClass="p-button-secondary"></p-button>
+</p-sidebar>
+
+<p-toast></p-toast>
+
+<div class="card">
+    <p-toolbar styleClass="p-mb-4">
+        <ng-template pTemplate="left">
+            <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success p-mr-2" (click)="openNew()"></button>
+            <button pButton pRipple [label]="Delete" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length"></button>
+        </ng-template>
+
+        <ng-template pTemplate="right">
+            <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Import" chooseLabel="Import" class="p-mr-2 p-d-inline-block"></p-fileUpload>
+            <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-help"></button>
+        </ng-template>
+    </p-toolbar>
+
+    <p-table #dt [value]="products" [rows]="10" [paginator]="true" [globalFilterFields]="['name','country.name','representative.name','status']"
+        [(selection)]="selectedProducts" [rowHover]="true" dataKey="id"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true">
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 3rem">
+                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                </th>
+                <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+                <th pSortableColumn="price">Price <p-sortIcon field="price"></p-sortIcon></th>
+                <th pSortableColumn="category">Category <p-sortIcon field="category"></p-sortIcon></th>
+                <th pSortableColumn="rating">Reviews <p-sortIcon field="rating"></p-sortIcon></th>
+                <th pSortableColumn="inventoryStatus">Status <p-sortIcon field="inventoryStatus"></p-sortIcon></th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product>
+            <tr>
+                <td>
+                    <p-tableCheckbox [value]="product"></p-tableCheckbox>
+                </td>
+                <td>{{product.name}}</td>
+                <td>{{product.price | currency:'USD'}}</td>
+                <td>{{product.category}}</td>
+                <td><p-rating [ngModel]="product.rating" [readonly]="true" [cancel]="false"></p-rating></td>
+                <td><span [class]="'product-badge status-' + product.inventoryStatus.toLowerCase()">{{product.inventoryStatus}}</span></td>
+                <td>
+                    <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-mr-2" (click)="editProduct(product)"></button>
+                    <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteProduct(product)"></button>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="summary">
+            <div class="p-d-flex p-ai-center p-jc-between">
+                In total there are {{products ? products.length : 0 }} products.
+            </div>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog [(visible)]="productDialog" [style]="{width: '450px'}" header="Add New Deal Details" [modal]="true" styleClass="p-fluid">
+    <ng-template pTemplate="content">
+        <div class="p-field">
+            <label for="name">Deal Name</label>
+            <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus />
+            <small class="p-invalid" *ngIf="submitted && !product.name">Name is required.</small>
+        </div>
+
+        <div class="p-field">
+            <label class="p-mb-3">Stage</label>
+            <div class="p-formgrid p-grid">
+                <div class="p-field-radiobutton p-col-6">
+                    <p-radioButton id="category1" name="category" value="Accessories" [(ngModel)]="product.category"></p-radioButton>
+                    <label for="category1">Proposed</label>
+                </div>
+                <div class="p-field-radiobutton p-col-6">
+                    <p-radioButton id="category2" name="category" value="Clothing" [(ngModel)]="product.category"></p-radioButton>
+                    <label for="category2">Working</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-formgrid p-grid">
+            <div class="p-field p-col">
+                <label for="price">Amount</label>
+                <p-inputNumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US"></p-inputNumber>
+            </div>
+            <label class="p-mb-3">Created Date</label>
+            <div class="p-field p-col-12 p-md-4">
+            <p-calendar placeholder="Select any date" 
+                        inputId="btnbaar"> 
+            </p-calendar>
+        </div>
+        <label class="p-mb-3">Close Date</label>
+        <div class="p-field p-col-12 p-md-4">
+        <p-calendar placeholder="Select any date" 
+                    inputId="btnbaar"> 
+        </p-calendar>
+    </div>
+    <div class="p-field">
+    <label for="description">Notes</label>
+    <textarea id="description" pInputTextarea [(ngModel)]="product.description" required rows="3" cols="20"></textarea>
+</div>
+<div class="p-field">
+<label for="name">Owner Full Name</label>
+<input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus />
+<small class="p-invalid" *ngIf="submitted && !product.name">Name is required.</small>
+</div>
+
+        </div>
+    </ng-template>
+    
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveProduct()"></button>
+    </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
